@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Gift for You ✨</title>
+    <style>
+        /* --- STYLE DASAR --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: "Georgia", "Playfair Display", serif;
+            /* Mengubah overflow ke auto agar perangkat layar kecil bisa melakukan scroll jika konten melebihi layar */
+            overflow-y: auto; 
+            padding: 20px;
+        }
+
+        /* --- STYLE CARD UTAMA (SHARED & RESPONSIVE) --- */
+        .card {
+            background-color: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06), 
+                        0 5px 15px rgba(0, 0, 0, 0.02);
+            text-align: center;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            opacity: 1;
+            transform: scale(1);
+            width: 100%;
+            /* Menggunakan max-width dinamis agar pas di perangkat kecil tapi tidak melar di laptop */
+            max-width: 420px; 
+            margin: auto;
+        }
+
+        #screen1 {
+            padding: 30px 20px;
+            max-width: 90%;
+            /* Menghapus white-space nowrap agar teks panjang otomatis turun baris di smartphone kecil */
+            white-space: normal; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #screen2 {
+            padding: 40px 25px 30px 25px;
+        }
+
+        #screen3 {
+            padding: 30px 20px;
+            /* Menggunakan min-height daripada height statis agar fleksibel mengikuti tinggi layar */
+            min-height: 480px;
+            height: 75vh; 
+            max-height: 550px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #screen-cake {
+            padding: 40px 25px;
+            max-width: 500px;
+        }
+
+        #screen-gallery {
+            padding: 35px 20px;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #screen-music {
+            padding: 40px 24px 35px 24px;
+            max-width: 420px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        /* --- SCREEN 1: TEKS MENGETIK --- */
+        .text-typing {
+            /* Menggunakan clamp() agar ukuran font otomatis mengecil di HP dan membesar di Laptop */
+            font-size: clamp(20px, 5vw, 26px);
+            color: #ff477e;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+
+        .cursor {
+            font-size: clamp(20px, 5vw, 26px);
+            color: #ff477e;
+            animation: blink 0.7s infinite;
+            margin-left: 2px;
+        }
+
+        /* --- SCREEN 2: INPUT PIN --- */
+        .pin-title {
+            font-size: clamp(22px, 5vw, 28px);
+            color: #ff477e;
+            font-weight: 500;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pin-display {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .pin-dot {
+            font-size: 20px;
+            color: #b5b5b5;
+            width: 14px;
+            text-align: center;
+            transition: color 0.2s;
+            font-family: sans-serif;
+        }
+
+        .pin-dot.filled { color: #ff477e; }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            justify-items: center;
+            padding: 0 5px;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .key {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: none;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 18px;
+            color: #333;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+        }
+
+        /* Hover efek dinonaktifkan pada perangkat layar sentuh/HP agar tidak bug */
+        @media (hover: hover) {
+            .key:hover {
+                transform: scale(1.12);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            }
+        }
+        .key:active { transform: scale(0.95); }
+        .key-0 { grid-column: 2; }
+
+        .pin-error-text {
+            font-size: 15px;
+            color: #444;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin-top: 18px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .pin-error-text.visible { opacity: 1; transform: translateY(0); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+
+        /* --- SCREEN 3: GAME TANGKAP HATI --- */
+        .game-title {
+            font-size: clamp(22px, 5vw, 28px);
+            color: #ff477e;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .game-score {
+            font-size: 14px;
+            color: #555;
+            font-family: -apple-system, sans-serif;
+            margin-bottom: 15px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            overflow: hidden;
+            border-radius: 12px;
+            background-color: #fffafb; /* Sedikit shading area game */
+        }
+
+        .falling-heart {
+            position: absolute;
+            font-size: clamp(28px, 6vw, 36px);
+            cursor: pointer;
+            user-select: none;
+            animation: fall linear forwards;
+            transform: translateX(-50%);
+        }
+
+        @keyframes fall {
+            0% { top: -45px; }
+            100% { top: 105%; }
+        }
+
+        /* --- MODAL OVERLAY POPUP --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 32px;
+            padding: 35px 20px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
+            transform: scale(0.85);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.show .modal-content { transform: scale(1); }
+
+        .win-title {
+            font-size: clamp(28px, 6vw, 34px);
+            color: #ff477e;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .win-subtitle {
+            font-size: 14px;
+            color: #666;
+            font-family: -apple-system, sans-serif;
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+
+        .btn-surprise, .btn-next {
+            background-color: #ff477e;
+            color: #ffffff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 50px;
+            font-family: -apple-system, sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 71, 126, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .btn-surprise:hover, .btn-next:hover {
+                transform: scale(1.05);
+                background-color: #ff336e;
+            }
+        }
+
+        /* --- SCREEN 4: BOX UTAMA UCAPAN --- */
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .title-container h1, .gallery-title h1 {
+            color: #ff477e;
+            font-size: clamp(20px, 5vw, 25px);
+            font-weight: 500;
+        }
+
+        .typing-container {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: clamp(14px, 4vw, 16px);
+            color: #444;
+            line-height: 1.5; 
+            min-height: 200px;
+            text-align: left; /* Teks ucapan rata kiri agar lebih nyaman dibaca */
+            padding: 0 5px;
+        }
+
+        .btn-container {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .btn-container.show-btn { opacity: 1; }
+
+        /* --- SCREEN 5: SLIDER/GALERI MEMORI --- */
+        .gallery-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            /* Menggunakan aspek rasio agar tinggi gambar menyesuaikan lebar layar secara proporsional */
+            aspect-ratio: 4 / 5; 
+            max-height: 350px;
+            overflow: hidden;
+            border-radius: 18px;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide-img {
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            object-fit: cover; 
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.85);
+            border: none;
+            color: #ff477e;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .btn-left { left: 10px; }
+        .btn-right { right: 10px; }
+
+        .slider-dots { display: flex; justify-content: center; gap: 8px; margin: 15px 0 20px 0; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #e0e0e0; cursor: pointer; }
+        .dot.active { background: #ff477e; transform: scale(1.2); }
+
+        /* --- SCREEN 6: KONTEN LAGU --- */
+        .music-title {
+            font-size: clamp(28px, 6vw, 36px);
+            color: #ff477e;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .music-subtitle {
+            font-size: 13px;
+            color: #a0a0a0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
+            margin-bottom: 25px;
+            padding: 0 10px;
+        }
+
+        .playlist-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .playlist-wrapper-frame {
+            border-radius: 12px;
+            overflow: hidden;   
+            background: transparent; 
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        @media (hover: hover) {
+            .playlist-wrapper-frame:hover {
+                transform: translateY(-2px);
+            }
+        }
+
+        .playlist-wrapper-frame iframe {
+            display: block;
+            border: none;
+            width: 100%;
+            height: 80px; 
+        }
+
+        .btn-finish {
+            background: #1db954;
+            color: #ffffff;
+            border: none;
+            padding: 13px 0;
+            width: 170px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 50px; 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(29, 185, 84, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .btn-finish:hover {
+                transform: scale(1.05);
+                background-color: #1ed760;
+                box-shadow: 0 10px 30px rgba(29, 185, 84, 0.35);
+            }
+        }
+        
+        .btn-finish:active { transform: scale(0.98); }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* --- MEDIA QUERIES UNTUK PERANGKAT SANGAT KECIL (Contoh: Jaringan Lama / HP Kecil) --- */
+        @media screen and (max-width: 350px) {
+            body { padding: 10px; }
+            .card { padding: 25px 15px 20px 15px !important; }
+            .key { width: 48px; height: 48px; font-size: 16px; }
+            .keypad { gap: 10px; }
+            #screen3 { min-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="screen1" class="card">
+        <span class="text-typing" id="typing-text"></span><span class="cursor">|</span>
+    </div>
+
+    <div id="screen2" class="card hidden">
+        <h2 class="pin-title">Enter PIN <span style="font-family: sans-serif; font-size: 24px;">💗</span></h2>
+        <div class="pin-display">
+            <span class="pin-dot">—</span><span class="pin-dot">—</span><span class="pin-dot">—</span>
+            <span class="pin-dot">—</span><span class="pin-dot">—</span><span class="pin-dot">—</span>
+        </div>
+        <div class="keypad">
+            <button class="key" onclick="pressKey('1')">1</button>
+            <button class="key" onclick="pressKey('2')">2</button>
+            <button class="key" onclick="pressKey('3')">3</button>
+            <button class="key" onclick="pressKey('4')">4</button>
+            <button class="key" onclick="pressKey('5')">5</button>
+            <button class="key" onclick="pressKey('6')">6</button>
+            <button class="key" onclick="pressKey('7')">7</button>
+            <button class="key" onclick="pressKey('8')">8</button>
+            <button class="key" onclick="pressKey('9')">9</button>
+            <button class="key key-0" onclick="pressKey('0')">0</button>
+        </div>
+        <div id="error-message" class="pin-error-text">Wrong PIN 🥺</div>
+    </div>
+
+    <div id="screen3" class="card hidden">
+        <h2 class="game-title">Catch 5 Hearts <span style="font-family: sans-serif; font-size: 24px;">💕</span></h2>
+        <div class="game-score">Score: <span id="score-val">0</span> / 5</div>
+        <div class="game-area" id="game-area"></div>
+    </div>
+
+    <div id="win-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h1 class="win-title">You Win <span style="font-family: sans-serif; font-size: 36px;">💕</span></h1>
+            <p class="win-subtitle">You caught my heart again 🥺 💗</p>
+            <button class="btn-surprise" onclick="goToCakeScreen()">Open Your Surprise 🎁</button>
+        </div>
+    </div>
+
+    <div id="screen-cake" class="card hidden">
+        <div class="birthday-box">
+            <div class="title-container">
+                <h1>Happy Birthday My Love</h1>
+                <span style="font-size:24px;">🥺 💞</span>
+            </div>
+            <div id="ucapan-text" class="typing-container"></div>
+            <div id="next-btn-container" class="btn-container">
+                <button class="btn-next" onclick="goToGalleryScreen()">Next 💗</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-gallery" class="card hidden">
+        <div class="gallery-title">
+            <h1>Our Memory</h1>
+            <span style="font-size:24px;">🥰 ✨</span>
+        </div>
+        <div class="slider-container">
+            <div class="slider-wrapper" id="sliderWrapper">
+                <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=500" class="slide-img" alt="Foto 1">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=500" class="slide-img" alt="Foto 2">
+                <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=500" class="slide-img" alt="Foto 3">
+            </div>
+            <button class="slider-btn btn-left" onclick="moveSlide(-1)">❮</button>
+            <button class="slider-btn btn-right" onclick="moveSlide(1)">❯</button>
+        </div>
+        <div class="slider-dots" id="sliderDots"></div>
+        <button class="btn-next" onclick="goToMusicScreen()">Next 🎵</button>
+    </div>
+
+    <div id="screen-music" class="card hidden">
+        <h2 class="music-title">Music For U <span style="font-family:sans-serif; font-size:28px;">🎶</span></h2>
+        <p class="music-subtitle">Lagu spesial diputar langsung dari Spotify</p>
+        
+        <div class="playlist-container">
+            <div class="playlist-wrapper-frame">
+                <iframe 
+                    data-testid="embed-iframe" 
+                    src="https://open.spotify.com/embed/track/5q2KZ00BlQCqvN5JYBcsY4?utm_source=generator" 
+                    frameBorder="0" 
+                    allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                    height="80">
+                 Maroon 5 - Sugar
+                </iframe>
+            </div>
+
+            <div class="playlist-wrapper-frame">
+                <iframe 
+                    data-testid="embed-iframe" 
+                    src="https://open.spotify.com/embed/track/1zFuSla4RQ5qAJwDIQYixW?utm_source=generator&theme=0" 
+                    frameBorder="0" 
+                    allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                    height="80">
+                </iframe>
+            </div>
+            <div class="playlist-wrapper-frame">
+                <iframe 
+                    data-testid="embed-iframe" 
+                    src="https://open.spotify.com/embed/track/4mgwF25zUC8axbk0XPBp04?utm_source=generator&theme=0" 
+                    frameBorder="0" 
+                    allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                    height="80">
+                </iframe>
+            </div>
+        </div>
+
+        <button class="btn-finish" onclick="finalCloseAction()">Close 💗</button>
+    </div>
+
+    <script>
+        const CORRECT_PIN = "050526"; 
+        const textTarget = "Preparing something sweet for you 🥰 💌";
+        const textArray = Array.from(textTarget);
+        let typingIndex = 0, inputPin = "", score = 0, gameInterval;
+        let currentSlide = 0, autoSlideInterval;
+
+        const screen1 = document.getElementById("screen1");
+        const screen2 = document.getElementById("screen2");
+        const screen3 = document.getElementById("screen3");
+        const winModal = document.getElementById("win-modal"); 
+        const screenCake = document.getElementById("screen-cake");
+        const screenGallery = document.getElementById("screen-gallery");
+        const screenMusic = document.getElementById("screen-music");
+        const typingTextElement = document.getElementById("typing-text");
+        const pinDots = document.querySelectorAll(".pin-dot");
+        const gameArea = document.getElementById("game-area");
+        const errorText = document.getElementById("error-message");
+
+        // Logic Alur Jalannya Aplikasi
+        function typeEffect() {
+            if (typingIndex < textArray.length) {
+                typingTextElement.textContent += textArray[typingIndex];
+                typingIndex++;
+                setTimeout(typeEffect, 120);
+            } else {
+                document.querySelector(".cursor").style.display = "none";
+                setTimeout(goToPinScreen, 1500);
+            }
+        }
+
+        function goToPinScreen() {
+            screen1.style.opacity = "0";
+            screen1.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                screen1.classList.add("hidden");
+                screen2.classList.remove("hidden");
+                void screen2.offsetWidth; 
+                screen2.style.opacity = "1";
+            }, 600);
+        }
+
+        function pressKey(num) {
+            if (inputPin.length === 0) errorText.classList.remove("visible");
+            if (inputPin.length < 6) {
+                inputPin += num;
+                updatePinDisplay();
+                if (inputPin.length === 6) setTimeout(checkPin, 300);
+            }
+        }
+
+        function updatePinDisplay() {
+            pinDots.forEach((dot, index) => {
+                if (index < inputPin.length) {
+                    dot.textContent = "●";
+                    dot.classList.add("filled");
+                } else {
+                    dot.textContent = "—";
+                    dot.classList.remove("filled");
+                }
+            });
+        }
+
+        function checkPin() {
+            if (inputPin === CORRECT_PIN) {
+                screen2.style.opacity = "0";
+                screen2.style.transform = "scale(0.95)";
+                setTimeout(() => {
+                    screen2.classList.add("hidden");
+                    screen3.classList.remove("hidden");
+                    void screen3.offsetWidth;
+                    screen3.style.opacity = "1";
+                    startGame();
+                }, 600);
+            } else {
+                screen2.classList.add("shake");
+                errorText.classList.add("visible"); 
+                inputPin = "";
+                setTimeout(() => { screen2.classList.remove("shake"); updatePinDisplay(); }, 400);
+            }
+        }
+
+        function startGame() { gameInterval = setInterval(spawnHeart, 900); }
+
+        function spawnHeart() {
+            if (score >= 5) { clearInterval(gameInterval); return; }
+            const heart = document.createElement("div");
+            heart.className = "falling-heart";
+            heart.innerHTML = "💗";
+            heart.style.left = (Math.random() * (gameArea.clientWidth - 50) + 25) + "px";
+            const fallDuration = Math.random() * 1.5 + 2.5;
+            heart.style.animation = `fall ${fallDuration}s linear forwards`;
+
+            heart.addEventListener("click", () => {
+                if (score < 5) {
+                    score++;
+                    document.getElementById("score-val").innerText = score;
+                    heart.remove();
+                    if (score === 5) {
+                        clearInterval(gameInterval);
+                        gameArea.innerHTML = ""; 
+                        setTimeout(showWinModal, 400); 
+                    }
+                }
+            });
+            gameArea.appendChild(heart);
+            setTimeout(() => { if (heart.parentElement) heart.remove(); }, fallDuration * 1000);
+        }
+
+        function showWinModal() { winModal.classList.add("show"); }
+
+        function goToCakeScreen() {
+            winModal.classList.remove("show"); 
+            screen3.style.opacity = "0";
+            screen3.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                screen3.classList.add("hidden");
+                screenCake.classList.remove("hidden");
+                void screenCake.offsetWidth;
+                screenCake.style.opacity = "1";
+                startUcapanTyping();
+            }, 600);
+        }
+
+        function startUcapanTyping() {
+            const ucapanTeks = [
+                "Hai My SweetHeart <br><br>", 
+                "Hari ini dunia jadi lebih indah karena kamu lahir.<br>",
+                "Terima kasih sudah hadir di hidup aku.<br><br>", 
+                "Aku bangga sama kamu.<br>",
+                "Aku sayang kamu.<br>",
+                "Dan aku selalu doakan yang terbaik buat kamu.<br><br>", 
+                "Happy birthday my sweetest human 💗"
+            ];
+            const targetElement = document.getElementById("ucapan-text");
+            let partIndex = 0, charIndex = 0;
+
+            function typePart() {
+                if (partIndex >= ucapanTeks.length) {
+                    document.getElementById("next-btn-container").classList.add("show-btn");
+                    return;
+                }
+                let currentText = ucapanTeks[partIndex];
+                if (currentText.substring(charIndex, charIndex + 4) === "<br>") {
+                    targetElement.innerHTML += "<br>";
+                    charIndex += 4;
+                    setTimeout(typePart, 50);
+                } else {
+                    let textArray = Array.from(currentText);
+                    if (charIndex < textArray.length) {
+                        targetElement.innerHTML += textArray[charIndex];
+                        charIndex++;
+                        setTimeout(typePart, 50);
+                    } else {
+                        partIndex++; charIndex = 0;
+                        setTimeout(typePart, 250); 
+                    }
+                }
+            }
+            typePart();
+        }
+
+        function goToGalleryScreen() {
+            screenCake.style.opacity = "0";
+            screenCake.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                screenCake.classList.add("hidden");
+                screenGallery.classList.remove("hidden");
+                void screenGallery.offsetWidth;
+                screenGallery.style.opacity = "1";
+                initSlider(); 
+            }, 600);
+        }
+
+        const wrapper = document.getElementById("sliderWrapper");
+        const totalSlides = document.querySelectorAll(".slide-img").length;
+
+        function initSlider() {
+            const dotsContainer = document.getElementById("sliderDots");
+            dotsContainer.innerHTML = "";
+            for(let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement("div");
+                dot.className = i === 0 ? "dot active" : "dot";
+                dot.setAttribute("onclick", `jumpToSlide(${i})`);
+                dotsContainer.appendChild(dot);
+            }
+            startAutoSlide();
+        }
+
+        function updateSliderPosition() {
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll(".dot").forEach((dot, index) => {
+                dot.classList.toggle("active", index === currentSlide);
+            });
+        }
+
+        function moveSlide(direction) {
+            clearInterval(autoSlideInterval);
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            updateSliderPosition();
+            startAutoSlide();
+        }
+
+        function jumpToSlide(index) {
+            clearInterval(autoSlideInterval);
+            currentSlide = index;
+            updateSliderPosition();
+            startAutoSlide();
+        }
+
+        function startAutoSlide() {
+            autoSlideInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSliderPosition();
+            }, 3000);
+        }
+
+        function goToMusicScreen() {
+            clearInterval(autoSlideInterval);
+            screenGallery.style.opacity = "0";
+            screenGallery.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                screenGallery.classList.add("hidden");
+                screenMusic.classList.remove("hidden");
+                void screenMusic.offsetWidth;
+                screenMusic.style.opacity = "1";
+            }, 600);
+        }
+
+        function finalCloseAction() {
+            alert("Terima kasih sudah melihat semua kejutannya! Selamat ulang tahun! 💖🎉");
+        }
+
+        window.onload = typeEffect;
+    </script>
+</body>
+</html>
